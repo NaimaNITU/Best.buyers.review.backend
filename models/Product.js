@@ -51,10 +51,19 @@ const productSchema = new mongoose.Schema({
   },
   brand: String,
   
-  // Category System
-  mainCategory: String,
-  subCategory: String,
-  subSubCategory: String,
+  // Category System(ref is same cz in category schema there have hiaercical flow)
+  mainCategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category"
+  },
+  subCategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category"
+  },
+  subSubCategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category"
+  },
   
   // Images - UPDATED for sub-images
   images: [{

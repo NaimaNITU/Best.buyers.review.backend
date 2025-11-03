@@ -113,6 +113,9 @@ const productController = {
       const skip = (page - 1) * limit;
 
       const products = await Product.find({ isActive: true })
+        .populate("mainCategory", "name")
+        .populate("subCategory", "name")
+        .populate("subSubCategory", "name")
         .sort({ lastUpdated: -1 })
         .skip(skip)
         .limit(limit)
