@@ -1,0 +1,90 @@
+const Category = require("../models/Category");
+const path=require("path");
+
+// ✅ Create Category
+exports.createCategory = async (req, res) => {
+  try {
+    const { name, parent } = req.body;
+    let image = req.file ? `/uploads/${req.file.filename}` : null;
+    let level = 1;
+
+    if (parent) {
+      const parentCat = await Category.findById(parent);
+      if (!parentCat)
+        return res.status(404).json({ message: "Parent not found" });
+
+      level = parentCat.level + 1;
+      if (level > 3)
+        return res.status(400).json({ message: "Maximum depth (3) reached" });
+    }
+
+    // No image for level 3
+    if (level === 3) image = null;
+
+    const category = await Category.create({ name, parent: parent || null, level, image });
+    res.status(201).json(category);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ Get all categories (build tree)
+exports.getAllCategories = async (req, res) => {
+  try {
+    const all = await Category.find().lean();
+
+    const buildTree = (parent = null) =>
+      all
+        .filter((c) =>
+          parent === null
+            ? c.parent === null
+            : String(c.parent) === String(parent)
+        )
+        .map((c) => ({
+          ...c,
+          children: buildTree(c._id),
+        }));
+
+    res.json(buildTree());
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ Update
+exports.updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    const updateData = { name };
+    if (req.file) updateData.image = `/uploads/${req.file.filename}`;
+
+    const category = await Category.findByIdAndUpdate(id, updateData, { new: true });
+    if (!category) return res.status(404).json({ message: "Not found" });
+
+    res.json(category);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ Delete Category (recursive)
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleteRecursively = async (catId) => {
+      const children = await Category.find({ parent: catId });
+      for (const child of children) {
+        await deleteRecursively(child._id);
+      }
+      await Category.findByIdAndDelete(catId);
+    };
+
+    await deleteRecursively(id);
+    res.json({ message: "Category and its subcategories deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
