@@ -5,6 +5,7 @@
   "scripts": {
     "start": "next start",
     "dev": "nodemon index.js",
+    "build": "esbuild index.js --bundle --platform=node --outfile=dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -29,6 +30,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "nodemon": "^3.1.10"
   }
 }
