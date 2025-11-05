@@ -15,9 +15,31 @@ connectDB();
 
 // Security + CORS
 app.use(helmet());
+// app.use(
+//   cors({
+//     origin: "*",
+//   })
+// );
+
+const allowedOrigins = [
+  "https://www.bestbuyersview.com",
+  "https://best-buyers-review-frontend-2.onrender.com",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow non-browser requests
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".bestbuyersview.com")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
   })
 );
 
