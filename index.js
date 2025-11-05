@@ -15,17 +15,25 @@ connectDB();
 
 // Security + CORS
 app.use(helmet());
-app.use(cors({
-  origin: "*"||"http://localhost:3000",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve uploaded images correctly
-app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
+// ✅ Serve uploaded images with CORP fix
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "public", "uploads"))
+);
 
 // API
 app.use("/api", apiRoutes);
