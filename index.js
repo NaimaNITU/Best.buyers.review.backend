@@ -17,7 +17,7 @@ connectDB();
 app.use(helmet());
 app.use(
   cors({
-    origin: "*",
+    origin: "https://best-buyers-review-frontend-2.onrender.com",
   })
 );
 
