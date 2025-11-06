@@ -64,6 +64,11 @@ const productSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category"
   },
+
+    labels: {
+    type: [String],
+    default: []
+  },
   
   // Images - UPDATED for sub-images
   images: [{

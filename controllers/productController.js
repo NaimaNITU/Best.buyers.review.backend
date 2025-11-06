@@ -108,20 +108,33 @@ const productController = {
   // Get all products with pagination
   getAllProducts: async (req, res) => {
     try {
+      const { mainCategory, subCategory, subSubCategory } = req.query;
+
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
 
-      const products = await Product.find({ isActive: true })
+      let filter = { isActive: true };
+
+      // ✅ Filter logic priority: level 3 > level 2 > level 1
+      if (subSubCategory) {
+        filter.subSubCategory = subSubCategory;
+      } else if (subCategory) {
+        filter.subCategory = subCategory;
+      } else if (mainCategory) {
+        filter.mainCategory = mainCategory;
+      }
+
+      const products = await Product.find(filter)
         .populate("mainCategory", "name")
         .populate("subCategory", "name")
         .populate("subSubCategory", "name")
         .sort({ lastUpdated: -1 })
         .skip(skip)
         .limit(limit)
-        .select('-__v');
+        .select("-__v");
 
-      const total = await Product.countDocuments({ isActive: true });
+      const total = await Product.countDocuments(filter);
 
       res.json({
         success: true,
@@ -131,15 +144,15 @@ const productController = {
             page,
             limit,
             total,
-            pages: Math.ceil(total / limit)
-          }
-        }
+            pages: Math.ceil(total / limit),
+          },
+        },
       });
 
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   },

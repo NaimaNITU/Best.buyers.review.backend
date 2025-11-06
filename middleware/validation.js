@@ -43,6 +43,7 @@ const productValidation = {
       subCategory: Joi.string().max(100),
       subSubCategory: Joi.string().max(100),
       
+      labels: Joi.array().items(Joi.string()).default([]),
       // Images
       images: Joi.array().items(
         Joi.object({
